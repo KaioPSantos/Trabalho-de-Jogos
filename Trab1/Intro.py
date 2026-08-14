@@ -4,14 +4,12 @@ import random
 pygame.init()
 pygame.font.init()
 
-
-
 font = font = pygame.font.Font(None, 50)
-Nome = "Seu Nome"
-rect =  (260, 100, 175, 35)
+Nome = "Kaio Pimentel"
+rect =  (170, 95, 270, 35)
 
 random.seed(Nome)
-x, y =  random.randint(0, 500), random.randint(0, 400)
+x, y =  random.randint(0, 200), random.randint(0, 400)
 
 print(y)
 
