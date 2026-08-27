@@ -88,6 +88,7 @@ class Grid (obj):
         self.score = 0
         self.font = pygame.font.SysFont('arial', 24, bold=True)
         self.font_small = pygame.font.SysFont('arial', 16)
+        self.pause_btn = pygame.Rect(0,0,0,0)
 
         self.spawn_piece()
 
@@ -132,9 +133,9 @@ class Grid (obj):
                 self.piece_x +=dx
 
     def move_y(self, dy):
-            if not self.ispaused and not self.game_over:
-                if not self.check_collision(dx=0, dy=dy):
-                    self.piece_y +=dy
+        if not self.ispaused and not self.game_over:
+            if not self.check_collision(dx=0, dy=dy):
+                self.piece_y +=dy
 
     def rotate(self):
         original_piece = self.current_piece
@@ -243,7 +244,19 @@ class Grid (obj):
                         ny = self.y + 110 + (y * block_size)
                         pygame.draw.rect(screen, self.next_color, (nx, ny, block_size, block_size))
                         pygame.draw.rect(screen, pygame.Color('gray'), (nx, ny, block_size, block_size), 1)
-                        
+
+        btn_y = self.y + 500
+        self.pause_btn = pygame.Rect(hud_x,btn_y,140,35)
+
+        btn_color = pygame.Color('red') if self.ispaused else pygame.Color('green')
+        pygame.draw.rect(screen, btn_color, self.pause_btn, border_radius=5)
+        pygame.draw.rect(screen, pygame.Color('white'), self.pause_btn, 2, border_radius=5)
+        
+        btn_text = " ► " if self.ispaused else "▐▐ "
+        btn_surf = self.font_small.render(btn_text, True, pygame.Color('white'))
+        btn_rect = btn_surf.get_rect(center=self.pause_btn.center)
+        screen.blit(btn_surf, btn_rect)
+        
         ctrl_y = self.y + 230
         controls = [
             "CONTROLES:",
@@ -263,6 +276,11 @@ class Grid (obj):
             go_rect = go_surface.get_rect(center=(self.x + grid_width // 2, self.y + grid_height // 2))
             pygame.draw.rect(screen, pygame.Color('black'), go_rect.inflate(20, 20))
             screen.blit(go_surface, go_rect)
+        elif self.ispaused:
+            pause_surface = self.font.render("Pausado", True, pygame.Color('green'))
+            pause_rect = pause_surface.get_rect(center=(self.x + grid_width // 2, self.y + grid_height // 2))
+            pygame.draw.rect(screen, pygame.Color('black'), pause_rect.inflate(20, 20))
+            screen.blit(pause_surface, pause_rect)
 
     def update(self, dt):
         if not self.current_piece or self.game_over:

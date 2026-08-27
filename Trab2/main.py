@@ -37,9 +37,10 @@ while True:
             exit()
 
         # uso do mouse é obrigatório
-        #elif event.type == pygame.MOUSEBUTTONDOWN:
-            i#f pygame.mouse.get_pressed()[0]: # 0 botão esquedo 2, direito
-                #pass # faça algo
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            if pygame.mouse.get_pressed()[0]: # 0 botão esquedo 2, direito
+                if campo_tetris.pause_btn.collidepoint(event.pos):
+                    campo_tetris.pause()
 
         #caso queira usar levantar o mouse, descomente
         #elif event.type == pygame.MOUSEBUTTONUP:
