@@ -1,16 +1,22 @@
 import pygame
 from player import Player
+from bullet import sinBullet
+from util import EventHandler
 
 #inicialização
 
 pygame.init()
 WIDTH   =  800; HEIGHT =  600
+clock = pygame.time.Clock()
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))  
 player = Player((50, 50))
+b = sinBullet((400, 300), -45, life_time=240) 
 
 objects = []
 objects.append(player)
+objects.append(b)
+
 
 # funções auxiliares
 
@@ -25,6 +31,13 @@ def handle_input(player):
             if event.key == pygame.K_TAB:
                 player.action_2()
 
+def remove_obj(obj):
+    #variavel global é feio, mas serve como um exemplo
+    if obj in objects:
+        objects.remove(obj) 
+
+#inscreve esse metodo pra remoção de objetos
+EventHandler().subscribe("DestroyObj", remove_obj)
 
 # loop principal
 
@@ -42,4 +55,5 @@ while running:
         obj.draw(screen)
     
     pygame.display.flip()
+    clock.tick(60)
     
