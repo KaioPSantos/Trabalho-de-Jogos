@@ -53,7 +53,6 @@ class Bullet (ABC):
 
     def destroy(self): # pede para deletar
         EventHandler().notify("DestroyObj", self) # avisa o mundo que saiu da tela
-        pass
 
 class sinBullet (Bullet):
     # exemplo, façam algo mais rebuscado

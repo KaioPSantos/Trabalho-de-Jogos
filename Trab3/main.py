@@ -27,9 +27,9 @@ def handle_input(player):
             exit()
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
-                player.action_1()
+                player.action_1() # pode ser melhorado para evento
             if event.key == pygame.K_TAB:
-                player.action_2()
+                player.action_2() # pode ser melhorado para evento
 
 def remove_obj(obj):
     #variavel global é feio, mas serve como um exemplo
