@@ -138,6 +138,9 @@ def handle_input(player_ref):
             exit()
         elif event.type == pygame.KEYDOWN:
             if game_state == "PLAYING":
+                if event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    exit()
                 if event.key == pygame.K_SPACE:
                     player_ref.time_slow()
                 if event.key == pygame.K_p:

@@ -21,7 +21,7 @@ class Enemy(ABC):
             self.destroy()
 
     def destroy(self):
-        if random.random() < 0.5:
+        if random.random() < 0.15:
             EventHandler().notify("SpawnObj", PowerUp(self.pos))
         EventHandler().notify("DestroyObj", self)
 
