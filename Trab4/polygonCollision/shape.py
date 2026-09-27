@@ -3,10 +3,13 @@ import pygame
 class Polygon:
     HANDLE_RADIUS = 8
 
-    def __init__(self, points):
-        self.points = list(points)
+    def __init__(self, points, is_subshape=False):
+        self.points = [pygame.Vector2(p) for p in points]
         self.selected_vertex = None
+        self.is_subshape = is_subshape
         self.update_geometry()
+        self.hit_timer = 0
+        self.can_hit = False
 
     # ---------------------------------------------------------
     # Geometry
@@ -16,13 +19,13 @@ class Polygon:
         self.bounding_box = self.get_bounding_box()
         self.convex = self.is_convex()
 
-        if self.convex:
+        if self.convex or self.is_subshape:
             self.convex_shapes = [self]
             self.decomposition_edges = []
         else:
             self.convex_shapes, self.decomposition_edges = \
                 self.decompose(self.points)
-
+            
     def get_bounding_box(self):
         #xs = [p[0] for p in self.points]
         #ys = [p[1] for p in self.points]
@@ -139,50 +142,39 @@ class Polygon:
     # ---------------------------------------------------------
 
     def decompose(self, points):
-        # Already convex
         if self.is_convex(points):
-            return [Polygon(points)], []
+            return [Polygon(points, is_subshape=True)], []
 
         n = len(points)
 
         for i in range(n):
-
             prev = points[i - 1]
             curr = points[i]
             next = points[(i + 1) % n]
 
-            # We only want convex vertices
             if self.cross(prev, curr, next) <= 0:
                 continue
 
-            # The triangle formed by the neighboring vertices
             triangle = [prev, curr, next]
-
-            # Remove the middle vertex
             remaining = points[:i] + points[i + 1:]
 
-            # If this triangle's diagonal is valid...
             if not self.valid_diagonal(prev, next, points):
                 continue
 
-            # ...and the remainder is convex, we're done
             if self.is_convex(remaining):
-
                 return (
-                    [Polygon(triangle), Polygon(remaining)],
+                    [Polygon(triangle, is_subshape=True), Polygon(remaining, is_subshape=True)],
                     [(prev, next)]
                 )
 
-            # Otherwise recursively decompose the remainder
             shapes, edges = self.decompose(remaining)
 
             return (
-                [Polygon(triangle)] + shapes,
+                [Polygon(triangle, is_subshape=True)] + shapes,
                 [(prev, next)] + edges
             )
 
-        # Should only happen for invalid/self-intersecting polygons
-        return [Polygon(points)], []
+        return [Polygon(points, is_subshape=True)], []
 
     # ---------------------------------------------------------
     # Mouse interaction
@@ -210,66 +202,20 @@ class Polygon:
     # Drawing
     # ---------------------------------------------------------
 
-    def draw(self, screen, highlight=None):
+    def trigger_hit(self):
+        if self.can_hit:
+            self.hit_timer = 0.15
 
-        # Bounding box
-        pygame.draw.rect(
-            screen,
-            (80, 80, 80),
-            self.bounding_box,
-            2
-        )
+    def update(self,dt):
+        if self.hit_timer > 0:
+            self.hit_timer = max(0, self.hit_timer - dt)
 
-        # Original polygon
-        pygame.draw.polygon(
-            screen,
-            (100, 180, 100),
-            self.points
-        )
-
-        pygame.draw.polygon(
-            screen,
-            (255, 255, 255),
-            self.points,
-            2
-        )
-
-        # Decomposition lines
-        for a, b in self.decomposition_edges:
-            pygame.draw.line(
-                screen,
-                (255, 200, 50),
-                a, b, 3
-            )
-
-        # Highlight the colliding convex shape
-        if highlight is not None:
-
-            pygame.draw.polygon(
-                screen,
-                (220, 70, 70),
-                highlight.points
-            )
-
-            pygame.draw.polygon(
-                screen,
-                (255, 255, 255),
-                highlight.points,
-                2
-            )
-
-        # Vertices
-        for i, p in enumerate(self.points):
-
-            color = (
-                (255, 255, 0)
-                if i == self.selected_vertex
-                else (255, 100, 100)
-            )
-
-            pygame.draw.circle(
-                screen,
-                color,
-                p,
-                self.HANDLE_RADIUS
-            )
+    def draw(self, screen, color=(100, 100, 100)):
+        if self.hit_timer > 0:
+            center = sum(self.points, pygame.Vector2(0, 0)) / len(self.points)
+            scale = 1.4  
+            expanded_points = [center + (p - center) * scale for p in self.points]
+            
+            pygame.draw.polygon(screen, (255, 255, 200), expanded_points)
+        else:
+            pygame.draw.polygon(screen, color, self.points)
